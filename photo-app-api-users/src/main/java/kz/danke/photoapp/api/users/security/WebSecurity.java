@@ -18,9 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class WebSecurity extends WebSecurityConfigurerAdapter {
 
-    @Value("${gateway.ip}")
-    private String gatewayIp;
-
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
     private final Environment environment;
@@ -34,7 +31,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                 .antMatchers("/**")
-                .hasIpAddress(gatewayIp)
+                .hasIpAddress(appProperties.getGateway().getIp())
                 .and()
                 .addFilter(getAuthenticationFilter());
         http
@@ -57,6 +54,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         authenticationFilter.setEnvironment(environment);
         authenticationFilter.setUserService(userService);
         authenticationFilter.setAppProperties(appProperties);
+        authenticationFilter.setFilterProcessesUrl(appProperties.getLoginUrlPath());
 
         return authenticationFilter;
     }

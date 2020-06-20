@@ -11,4 +11,14 @@ public class AppProperties {
 
     private long tokenExpiration;
     private String tokenSecret;
+    private String loginUrlPath;
+
+    private final Gateway gateway = new Gateway();
+
+    @Getter
+    @Setter
+    public static class Gateway {
+
+        private String ip;
+    }
 }
