@@ -20,7 +20,6 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
-    private final Environment environment;
     private final AppProperties appProperties;
 
     @Override
@@ -51,7 +50,6 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     public AuthenticationFilter getAuthenticationFilter() throws Exception {
         AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager());
 
-        authenticationFilter.setEnvironment(environment);
         authenticationFilter.setUserService(userService);
         authenticationFilter.setAppProperties(appProperties);
         authenticationFilter.setFilterProcessesUrl(appProperties.getLoginUrlPath());
