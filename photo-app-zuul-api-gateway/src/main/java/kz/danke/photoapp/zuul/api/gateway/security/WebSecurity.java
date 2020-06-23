@@ -27,19 +27,14 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .frameOptions()
                 .disable();
         http
-                .cors(httpSecurityCorsConfigurer -> {
-                    CorsConfiguration corsConfiguration = new CorsConfiguration();
-                    corsConfiguration.addAllowedOrigin("*");
-                    corsConfiguration.addAllowedHeader("*");
-                    corsConfiguration.addAllowedMethod("*");
-                });
-        http
                 .authorizeRequests()
                 .antMatchers(environment.getProperty("api.h2console.url.path")).permitAll()
                 .antMatchers(HttpMethod.POST, environment.getProperty("api.registration.url.path")).permitAll()
                 .antMatchers(HttpMethod.POST, environment.getProperty("api.login.url.path")).permitAll()
                 .anyRequest()
-                .authenticated();
+                .authenticated()
+                .and()
+                .addFilter(new AuthorizationFilter(authenticationManager(), environment));
         http
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
