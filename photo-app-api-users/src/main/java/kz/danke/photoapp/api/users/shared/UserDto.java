@@ -1,11 +1,13 @@
 package kz.danke.photoapp.api.users.shared;
 
+import kz.danke.photoapp.api.users.ui.model.AlbumResponseModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,4 +23,5 @@ public class UserDto implements Serializable {
     private String email;
     private String userId;
     private String encryptedPassword;
+    private List<AlbumResponseModel> albums;
 }

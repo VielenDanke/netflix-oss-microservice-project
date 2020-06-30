@@ -4,6 +4,7 @@ import kz.danke.photoapp.api.users.service.UserService;
 import kz.danke.photoapp.api.users.shared.UserDto;
 import kz.danke.photoapp.api.users.ui.model.CreateUserRequest;
 import kz.danke.photoapp.api.users.ui.model.CreateUserResponse;
+import kz.danke.photoapp.api.users.ui.model.UserResponseModel;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -22,6 +23,7 @@ public class UsersController {
 
     private final Environment environment;
     private final UserService userService;
+    private final ModelMapper modelMapper;
 
     @GetMapping("/status/check")
     public String status() {
@@ -43,5 +45,14 @@ public class UsersController {
         CreateUserResponse userResponse = modelMapper.map(createdUser, CreateUserResponse.class);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
+    }
+
+    @GetMapping(value = "/{userId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<UserResponseModel> getUserById(@PathVariable(name = "userId") String userId) {
+        UserDto userDto = userService.findUserById(userId);
+
+        UserResponseModel returnValue = modelMapper.map(userDto, UserResponseModel.class);
+
+        return ResponseEntity.status(HttpStatus.OK).body(returnValue);
     }
 }

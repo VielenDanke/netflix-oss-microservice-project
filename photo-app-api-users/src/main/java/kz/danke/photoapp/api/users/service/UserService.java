@@ -8,4 +8,6 @@ public interface UserService extends UserDetailsService {
     UserDto createUser(UserDto userDto);
 
     UserDto findUserByEmail(String email);
+
+    UserDto findUserById(String userId);
 }
