@@ -1,0 +1,102 @@
+version: "2.2"
+services:
+  elasticsearch:
+    container_name: elasticsearch
+    hostname: elasticsearch
+    image: "docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}"
+    environment:
+      - cluster.name=es-cluster
+      - node.name=es-node-1
+      - path.data=/home/vielen/IdeaProjects/netflix-oss-microservice-project/elk/elasticsearch/data
+      - http.port=9200
+      - http.host=0.0.0.0
+      - http.cors.enabled=true
+      - http.cors.allow-credentials=true
+      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization,WWW-Authenticate
+      - discovery.type=single-node
+      - http.cors.allow-origin=/https?:\/\/localhost(:[0-9]+)?/
+      - transport.host=127.0.0.1
+      - bootstrap.memory_lock=true
+      # - xpack.security.enabled=true
+      - "ES_JAVA_OPTS=-Xms${ES_JVM_HEAP} -Xmx${ES_JVM_HEAP}"
+    mem_limit: ${ES_MEM_LIMIT}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      # ES data dir mount to local drive
+      - ${ES_MOUNT_DRIVE}:/home/vielen/IdeaProjects/netflix-oss-microservice-project/elk/elasticsearch/data
+    ports:
+      - '9200:9200'
+    networks:
+      - 'elk_stack'
+    healthcheck:
+      test: ["CMD", "curl","-s" ,"-f", "-u", "elastic:${ES_PASSWORD}", "http://localhost:9200/_cat/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Kibana container. localhost 5601
+  kibana:
+    container_name: kibana
+    hostname: kibana
+    image: "docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}"
+    environment:
+      - "ELASTICSEARCH_USERNAME=${ES_USERNAME}"
+      - "ELASTICSEARCH_PASSWORD=${ES_PASSWORD}"
+      - server.port=127.0.0.1:5601
+      - elasticsearch.url="http://elasticsearch:9200"
+      - server.name="kibana"
+    ports:
+      - '5601:5601'
+    healthcheck:
+          test: ["CMD", "curl", "-s", "-f", "http://localhost:5601/login"]
+          retries: 6
+    networks:
+      - 'elk_stack'
+    depends_on:
+      - 'elasticsearch'
+      
+  logstash:
+    image: "docker.elastic.co/logstash/logstash:${ELASTIC_VERSION}"
+    volumes:
+      - /home/vielen/IdeaProjects/netflix-oss-microservice-project/elk/logstash/config/logstash.yml:/home/lindevhard/Documents/elk/logstash/config/logstash.yml:ro
+      - /home/vielen/IdeaProjects/netflix-oss-microservice-project/elk/logstash/pipeline:/home/lindevhard/Documents/elk/logstash/pipeline:ro
+    ports:
+      - '5000:5000'
+    networks:
+      - 'elk_stack'  
+    depends_on:
+    - elasticsearch
+    - kibana
+
+  # Configure Stack container. This short lived container configures the stack once Kibana and Elasticsearch
+  # are available. More specifically, using a script it sets passwords, import dashboards,
+  # sets a default index pattern, loads templates and pipelines
+  configure_stack:
+    container_name: configure_stack
+    image: docker.elastic.co/beats/metricbeat:${ELASTIC_VERSION}
+    environment:
+      - 'ELASTIC_VERSION=${ELASTIC_VERSION}'
+      - 'ES_PASSWORD=${ES_PASSWORD}'
+      - 'ES_DEFAULT_INDEX_PATTERN=${ES_DEFAULT_INDEX_PATTERN}'
+    volumes:
+      - './init/configure-stack.sh:/home/vielen/IdeaProjects/netflix-oss-microservice-project/elk/init/configure-stack.sh:ro'
+    command: ['/bin/bash', '-c', 'cat /home/vielen/IdeaProjects/netflix-oss-microservice-project/elk/init/configure-stack.sh | tr -d "\r" | bash']
+    networks:
+      - 'elk_stack'
+    depends_on:
+      - 'elasticsearch'
+      - 'kibana'
+
+
+networks:
+  elk_stack:
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+        # default docker compose subnet(172.177.0.0/16), which may overlap with existing services on home network.
+        # use this configuration to update to a different subnet
+        - subnet: 192.168.1.0/24
