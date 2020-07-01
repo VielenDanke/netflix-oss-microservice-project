@@ -1,4 +1,4 @@
-package kz.danke.photoapp.api.users.shared;
+package kz.danke.photoapp.api.users.feign.decoder;
 
 import feign.Response;
 import feign.codec.ErrorDecoder;

@@ -1,7 +1,6 @@
 package kz.danke.photoapp.api.users.service.impl;
 
-import feign.FeignException;
-import kz.danke.photoapp.api.users.data.AlbumServiceClient;
+import kz.danke.photoapp.api.users.feign.AlbumServiceClient;
 import kz.danke.photoapp.api.users.data.UserEntity;
 import kz.danke.photoapp.api.users.repository.UserRepository;
 import kz.danke.photoapp.api.users.service.UserService;
@@ -10,17 +9,12 @@ import kz.danke.photoapp.api.users.ui.model.AlbumResponseModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +73,9 @@ public class UserServiceImpl implements UserService {
 //            log.error(e.getLocalizedMessage());
 //            albumList = new ArrayList<>();
 //        }
+        log.info("Before calling albums microservice");
         List<AlbumResponseModel> albumList = albumServiceClient.getAlbums(userId);
+        log.info("After calling albums microservice");
 
         UserDto userDto = modelMapper.map(userEntity, UserDto.class);
 
