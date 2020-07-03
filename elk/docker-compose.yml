@@ -61,8 +61,8 @@ services:
   logstash:
     image: "docker.elastic.co/logstash/logstash:${ELASTIC_VERSION}"
     volumes:
-      - /home/vielen/IdeaProjects/netflix-oss-microservice-project/elk/logstash/config/logstash.yml:/home/lindevhard/Documents/elk/logstash/config/logstash.yml:ro
-      - /home/vielen/IdeaProjects/netflix-oss-microservice-project/elk/logstash/pipeline:/home/lindevhard/Documents/elk/logstash/pipeline:ro
+      - /home/vielen/IdeaProjects/netflix-oss-microservice-project/elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - /home/vielen/IdeaProjects/netflix-oss-microservice-project/elk/logstash/pipeline:/usr/share/logstash/pipeline:ro
     ports:
       - '5000:5000'
     networks:

@@ -1,1 +1,3 @@
 elk/elasticsearch/
+
+*.gz
