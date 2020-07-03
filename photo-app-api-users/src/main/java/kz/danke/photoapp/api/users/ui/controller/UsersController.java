@@ -12,9 +12,13 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -47,6 +51,8 @@ public class UsersController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
 
+    @PreAuthorize(value = "principal == #userId")
+    @PostAuthorize(value = "principal == returnObject.body.userId")
     @GetMapping(value = "/{userId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<UserResponseModel> getUserById(@PathVariable(name = "userId") String userId) {
         UserDto userDto = userService.findUserById(userId);
